@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merry Christmas</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+        canvas {
+            display: block;
+        }
+        #gift-box {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            background: url('gift.jpg') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+        }
+        #gift-text {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Thêm nhạc nền -->
+    <audio id="background-music" autoplay loop>
+        <source src="chrismas.mp3.m4a" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <canvas id="canvas"></canvas>
+
+    <div id="gift-box" onclick="openGift()"></div>
+    <div id="gift-text">Nhấn vào đây</div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const lightColors = ["tomato", "gold", "orange", "lightgreen", "white"];
+        let snowflakes = [];
+
+        // Vẽ cây thông lớn hơn với nhiều chi tiết
+        function drawTree(x, y, width, height, depth = 15) {
+            const trunkWidth = width / 8;
+            const trunkHeight = height / 12;
+
+            // Vẽ thân cây
+            ctx.fillStyle = "saddlebrown";
+            ctx.fillRect(x - trunkWidth / 2, y, trunkWidth, trunkHeight);
+
+            // Vẽ các tầng của cây
+            const layerHeight = height / depth;
+            for (let i = 0; i < depth; i++) {
+                const layerWidth = width - (width / depth) * i;
+                const layerX = x - layerWidth / 2;
+                const layerY = y - trunkHeight - i * layerHeight;
+
+                ctx.beginPath();
+                ctx.moveTo(layerX, layerY);
+                ctx.lineTo(layerX + layerWidth / 2, layerY - layerHeight);
+                ctx.lineTo(layerX + layerWidth, layerY);
+                ctx.closePath();
+                ctx.fillStyle = "darkgreen";
+                ctx.fill();
+
+                // Thêm đèn sáng ngẫu nhiên
+                const numLights = Math.floor(Math.random() * 6) + 4;
+                for (let j = 0; j < numLights; j++) {
+                    const lightX = layerX + Math.random() * layerWidth;
+                    const lightY = layerY - Math.random() * layerHeight;
+
+                    ctx.beginPath();
+                    ctx.arc(lightX, lightY, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = lightColors[Math.floor(Math.random() * lightColors.length)];
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Vẽ ngôi sao trên đỉnh
+        function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = "gold";
+            ctx.fill();
+        }
+
+        // Vẽ bông tuyết
+        function createSnowflakes() {
+            for (let i = 0; i < 500; i++) {
+                snowflakes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 4 + 1,
+                    speed: Math.random() * 1 + 0.5,
+                });
+            }
+        }
+
+        function drawSnowflakes() {
+            ctx.fillStyle = "white";
+            for (let flake of snowflakes) {
+                ctx.beginPath();
+                ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function updateSnowflakes() {
+            for (let flake of snowflakes) {
+                flake.y += flake.speed;
+                if (flake.y > canvas.height) {
+                    flake.y = -flake.radius;
+                }
+            }
+        }
+
+        // Vẽ chữ "Merry Christmas"
+        function drawText() {
+            ctx.font = "60px Comic Sans MS"; // Giảm kích thước chữ
+            ctx.fillStyle = "red";
+            ctx.textAlign = "center";
+            ctx.fillText("Merry Christmas", canvas.width / 2, canvas.height / 10); // Di chuyển chữ lên cao hơn
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawText();
+            drawTree(canvas.width / 2, canvas.height - 200, 700, 600); // Cây thông thấp hơn và rộng hơn
+            drawStar(canvas.width / 2, canvas.height - 800, 5, 50, 25); // Ngôi sao trên đỉnh
+            drawSnowflakes();
+            updateSnowflakes();
+            requestAnimationFrame(animate);
+        }
+
+        function openGift() {
+            window.location.href = "gift.html"; // Chuyển đến file HTML khác
+        }
+
+        createSnowflakes();
+        animate();
+    </script>
+</body>
+</html>
